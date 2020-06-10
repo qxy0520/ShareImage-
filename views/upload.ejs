@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<%- include("./header.ejs") %>
+
+<%- include("./nav.ejs", {username: username}) %>
+<body>
+    
+        <div class="imgSize">
+            <img id="preview" class="imag">
+        </div>
+        <div style="margin: 0 auto; width: 400px; height: 400px;">
+        <form id="form" method="POST" enctype="multipart/form-data" action="/image/upload" onsubmit="return check();">
+            <input type="file" accept="image/*" name="file" id="file" />
+            <input type="submit" value="提交" />
+        </form>
+    </div>
+
+    <script>
+        var fileDom = document.getElementById("file");
+        var previewDom = document.getElementById("preview");
+        fileDom.addEventListener("change", e => {
+            var file = fileDom.files[0];
+            // check if input contains a valid image file
+            if (!file || file.type.indexOf("image/") < 0) {
+                fileDom.value = "";
+                previewDom.src = "";
+                return;
+            }
+
+            // use FileReader to load image and show preview of the image
+            var fileReader = new FileReader();
+            fileReader.onload = e => {
+                previewDom.src = e.target.result;
+            };
+            fileReader.readAsDataURL(file);
+        });
+
+        var formDom = document.getElementById("form");
+        function check() {
+            var file = fileDom.files[0];
+            // check if input contains a valid image file
+            if (!file || file.type.indexOf("image/") < 0) {
+                return false;
+            }
+            return true;
+        }
+    </script>
+</body>
+
+</html>

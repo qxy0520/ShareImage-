@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<%- include("./header.ejs") %>
+
+<body>
+    <%- include("./nav.ejs", {username: username}) %>
+    <div class="imageBoxs">
+        <div class="message">
+            <h4>Uploader:
+                <%- item.user_name %>
+            </h4>
+            <img class="show_pic" src="<%- item.picture_url %>">
+            <div class="t_p">
+                <div class="cc tt">
+                    <p>
+                        <%- item.picture_time %>
+                    </p>
+                </div>
+                <div class="cc">
+                    <% if(item.likeyes) { %>
+                    <img class="images" src="/images/likeyes.png" onclick="like(this)">
+                    <% } else { %>
+                    <img class="images" src="/images/like.png" onclick="like(this)">
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="commentBox">
+        <h4>Comments: </h4>
+        <textarea id="commentInput" class="text"></textarea><br>
+        <button class="btn btn-primary" onclick="comment()">Submit</button>
+        <div id="showComment">
+            <% comments.map((item) => { %>
+                <div class="commentItem">
+                    <span>User: <%= item.user_name %></span>
+                    <p>Content: <%= item.comment_content %>></p>
+                </div>
+            <% }) %>
+            <!-- <div class="commentItem">
+                <span>User: 1212</span>
+                <p>Content: 1212</p>
+            </div> -->
+        </div>
+    </div>
+</body>
+<script>
+    let item = JSON.parse('<%- JSON.stringify(item) %>');
+    let username = JSON.parse('<%- JSON.stringify(username) %>')
+    let comment = (e) => {
+        var ta = document.getElementById('commentInput');
+        var text = ta.value;
+        if(username) {
+            post('/comments/add', { picture_id: item.picture_id, commentText: text})
+                .then(res => {
+                    console.log(res)
+                    if(res.message == 'succeed') {
+                        ta.value = '';
+                        let newComment = `
+                            <div class="commentItem">
+                                <span>User: ${username}</span>
+                                <p>Content: ${text}</p>
+                            </div>
+                        `
+                        let commentBox = document.getElementById('showComment');
+                        commentBox.innerHTML = commentBox.innerHTML + newComment;
+                    }
+                })
+
+        } else {
+            alert('Please Login First')
+            window.location.href= '/users/login'
+        }
+    }
+    let like = (e) => {
+        if (!username) {
+            alert('Please Login First');
+            window.location.href = '/users/login';
+        }
+        
+        if (item.likeyes) {
+            // 取消喜欢
+            post('/image/dislike', { picture_id: item.picture_id })
+                .then(res => {
+                    console.log(res);
+                    if (res.message == 'succeed') {
+                        e.setAttribute('src', '/images/like.png');
+                        item.likeyes = false;
+                    }
+                })
+        } else {
+            // 新增喜欢
+            post('/image/like', { picture_id: item.picture_id })
+                .then(res => {
+                    console.log(res)
+                    if (res.message == 'succeed') {
+                        e.setAttribute('src', '/images/likeyes.png');
+                        item.likeyes = true;
+                    }
+                })
+        }
+    }
+    // var time = document.getElementById('time');
+
+</script>
+
+</html>

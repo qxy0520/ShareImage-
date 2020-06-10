@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <%- include("./header.ejs") %>
+  <body>
+  <%- include("./nav.ejs", {username: username}) %>
+  <% picMessage = JSON.parse(picMessages)%>
+    <div class="imageBox">
+      <% picMessage.map((item, index) => { %>
+        <div class="imageBoxItem">
+          <p>Uploader:
+            <%- item.user_name %>
+          </p>
+          <a href="/image/<%- item.picture_id %>"><img class="show_pic" style="width: 280px; height: 150px;" src="<%- item.picture_url %>"></a>
+          <div class="t_p">
+            <div class="cc tt">
+              <p>
+                <%- item.picture_time %>
+              </p>
+            </div>
+            <div class="cc">
+              <% if(item.likeyes) { %>
+                <img class="images" src="/images/likeyes.png" key="<%- index %>" onclick="like(this)" >
+              <% } else { %>
+                <img class="images" src="/images/like.png" key="<%- index %>" onclick="like(this)">
+              <% } %>
+              <a href="/image/<%- item.picture_id %>">
+                <img class="images" src="/images/comment.png">
+              </a>
+            </div>
+          </div>
+        </div>
+      <%})%>
+    </div>
+  </body>
+  <script>
+    let tt = JSON.parse('<%- picMessages %>');
+    let usernames = '<%- username %>';
+    let like = (e) => {
+      if(!usernames) {
+        alert('Please Login First');
+        window.location.href = '/users/login';
+      }
+      let key = e.getAttribute('key');
+      let pic = tt[key];
+      if(pic.likeyes) {
+        // 取消喜欢
+        post('/image/dislike', {picture_id: pic.picture_id})
+          .then(res => {
+            console.log(res);
+            if(res.message == 'succeed') {
+              e.setAttribute('src', '/images/like.png');
+              pic.likeyes = false;
+            }
+          })
+      } else {
+        // 新增喜欢
+        post('/image/like', { picture_id: pic.picture_id })
+          .then(res => {
+            console.log(res)
+            if(res.message == 'succeed') {
+              e.setAttribute('src', '/images/likeyes.png');
+              pic.likeyes = true;
+            }
+          })
+      }
+    }
+    console.log(tt)
+
+
+  </script>
+</html>
